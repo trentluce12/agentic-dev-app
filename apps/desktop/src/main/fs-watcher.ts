@@ -33,14 +33,28 @@ export function createFsWatcher(): FsWatcherHandle {
   const emitter = new EventEmitter();
   const watchers = new Map<string, FSWatcher>();
 
-  function classify(relPath: string): FsChangeKind | null {
+  function classify(relPath: string, evt: string): FsChangeKind | null {
     const parts = relPath.replace(/\\/g, '/').split('/');
     if (parts[0] !== '.claude') return null;
-    if (parts[1] === 'agents' && parts[2]?.endsWith('.md')) return 'agentChanged';
-    if (parts[1] === 'commands' && parts[2]?.endsWith('.md')) return 'commandChanged';
-    if (parts[1] === 'hooks') return 'hookScriptChanged';
+    if (parts[1] === 'agents' && parts[2]?.endsWith('.md') && !parts[2].endsWith('.md.tmp')) {
+      if (evt === 'add') return 'agentAdded';
+      if (evt === 'unlink') return 'agentRemoved';
+      if (evt === 'change') return 'agentChanged';
+      return null;
+    }
+    if (parts[1] === 'commands' && parts[2]?.endsWith('.md')) {
+      if (evt === 'add') return 'commandAdded';
+      if (evt === 'unlink') return 'commandRemoved';
+      if (evt === 'change') return 'commandChanged';
+      return null;
+    }
+    if (parts[1] === 'hooks') {
+      if (evt === 'change' || evt === 'add') return 'hookScriptChanged';
+      return null;
+    }
     if (parts[1] === 'settings.json' || parts[1] === 'settings.local.json') {
-      return 'settingsChanged';
+      if (evt === 'change' || evt === 'add') return 'settingsChanged';
+      return null;
     }
     return null;
   }
@@ -53,9 +67,9 @@ export function createFsWatcher(): FsWatcherHandle {
         ignoreInitial: true,
         awaitWriteFinish: { stabilityThreshold: 150, pollInterval: 50 },
       });
-      watcher.on('all', (_evt, absPath) => {
+      watcher.on('all', (evt, absPath) => {
         const rel = absPath.slice(projectPath.length + 1);
-        const kind = classify(rel);
+        const kind = classify(rel, evt);
         if (!kind) return;
         emitter.emit('change', { projectPath, kind, path: absPath } satisfies FsChangeEvent);
       });

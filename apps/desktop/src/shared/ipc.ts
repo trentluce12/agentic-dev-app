@@ -25,6 +25,7 @@ export interface AgentSummary {
   tools: string[];
   model?: string;
   hasIssues: boolean;
+  lastModified: number;
 }
 
 export interface AgentFile {
@@ -34,6 +35,14 @@ export interface AgentFile {
   body: string;
   issues: AgentValidationIssue[];
   mtimeMs: number;
+  rawFrontmatter: string;
+}
+
+export interface AgentsCreateRequest {
+  projectPath: string;
+  agentName: string;
+  frontmatter: AgentFrontmatter;
+  body: string;
 }
 
 export interface SessionLaunchRequest {
@@ -61,6 +70,7 @@ export type IpcChannel =
   | 'agents:list'
   | 'agents:read'
   | 'agents:write'
+  | 'agents:create'
   | 'agents:delete'
   | 'settings:read'
   | 'settings:write'
@@ -75,8 +85,14 @@ export type IpcEvent =
   | { channel: 'session:event'; sessionId: string; payload: unknown }
   | { channel: 'session:status'; sessionId: string; status: SessionSummary['status'] }
   | { channel: 'hook:received'; sessionId: string; payload: HookPayload }
+  | { channel: 'fs:agentAdded'; projectPath: string; agentPath: string }
   | { channel: 'fs:agentChanged'; projectPath: string; agentPath: string }
-  | { channel: 'fs:settingsChanged'; projectPath: string };
+  | { channel: 'fs:agentRemoved'; projectPath: string; agentPath: string }
+  | { channel: 'fs:commandAdded'; projectPath: string; commandPath: string }
+  | { channel: 'fs:commandChanged'; projectPath: string; commandPath: string }
+  | { channel: 'fs:commandRemoved'; projectPath: string; commandPath: string }
+  | { channel: 'fs:settingsChanged'; projectPath: string; settingsPath: string }
+  | { channel: 'fs:hookScriptChanged'; projectPath: string; hookPath: string };
 
 export interface IpcApi {
   app: {
@@ -93,7 +109,13 @@ export interface IpcApi {
     write: (
       projectPath: string,
       agentName: string,
-      file: Omit<AgentFile, 'issues' | 'mtimeMs'>,
+      file: Omit<AgentFile, 'issues' | 'mtimeMs' | 'rawFrontmatter'>,
+    ) => Promise<AgentFile>;
+    create: (
+      projectPath: string,
+      agentName: string,
+      frontmatter: AgentFrontmatter,
+      body: string,
     ) => Promise<AgentFile>;
     delete: (projectPath: string, agentName: string) => Promise<void>;
   };

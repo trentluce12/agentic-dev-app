@@ -24,6 +24,8 @@ const api: IpcApi = {
     read: (path, name) => ipcRenderer.invoke('agents:read', path, name) as Promise<AgentFile>,
     write: (path, name, file) =>
       ipcRenderer.invoke('agents:write', path, name, file) as Promise<AgentFile>,
+    create: (path, name, frontmatter, body) =>
+      ipcRenderer.invoke('agents:create', path, name, frontmatter, body) as Promise<AgentFile>,
     delete: (path, name) => ipcRenderer.invoke('agents:delete', path, name) as Promise<void>,
   },
   settings: {
