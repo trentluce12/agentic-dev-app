@@ -1,0 +1,24 @@
+{
+  "name": "agentic-dev-app",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Custom desktop UI for Claude Code — agent orchestration cockpit",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @agentic-dev-app/desktop dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @agentic-dev-app/desktop test:e2e"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.6.3"
+  }
+}

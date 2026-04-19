@@ -1,0 +1,33 @@
+appId: dev.agenticdevapp.desktop
+productName: Agentic Dev App
+directories:
+  buildResources: build
+  output: dist
+files:
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
+  - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+asarUnpack:
+  - resources/**
+win:
+  executableName: agentic-dev-app
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    - NSCameraUsageDescription: Application does not use the camera.
+    - NSMicrophoneUsageDescription: Application does not use the microphone.
+  notarize: false
+linux:
+  target:
+    - AppImage
+    - deb
+  maintainer: agentic-dev-app
+  category: Development
