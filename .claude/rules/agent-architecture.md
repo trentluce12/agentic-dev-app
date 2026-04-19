@@ -56,6 +56,8 @@ In this project:
 
 Rule of thumb: if you can write the sequence as a numbered list that doesn't change, make it a workflow. Only use an agent for genuine branching.
 
+**Parallelization rule.** Leads always run **serially** in the deterministic order `shared → main → renderer → qa → infra` — their outputs are consumed by later leads, so parallelism breaks the quality gate. Implementers **within a single lead run** may be parallelized when their file targets are disjoint (observed in 0002: `impl-renderer-shadcn` writing `components/ui/` ran in parallel with `impl-renderer-editor` writing `codemirror/`; all three `lead-qa` implementers ran in parallel). First implementer in a dependency chain (e.g., fixture creation before tests that consume it) must finish before dependents start. When unsure whether targets are disjoint, default to serial — a serial run is always correct, a parallel run can race.
+
 ---
 
 ## The `x-tier` Frontmatter Convention

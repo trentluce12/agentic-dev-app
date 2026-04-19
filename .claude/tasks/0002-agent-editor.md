@@ -2,8 +2,9 @@
 task_id: 0002-agent-editor
 title: Agent editor — list, CM6 split frontmatter/body, Zod diagnostics, 3-tier picker, FS-watcher live reload
 created: 2026-04-19
+closed: 2026-04-19
 owner: trentluce12
-status: planned
+status: closed
 design_first: false
 contract_needed: true
 domains:
@@ -13,6 +14,7 @@ domains:
   qa: true
   infra: true
 contract: .claude/contracts/0002-agent-editor.md
+pr: https://github.com/trentluce12/agentic-dev-app/pull/3
 ---
 
 ## Goal
