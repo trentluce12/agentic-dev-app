@@ -98,12 +98,13 @@
 
 **Steps:**
 1. `/branch-sync` — ensure branch is up-to-date with `dev-tl` or `main` as appropriate.
-2. Invoke `orchestrator` with the task file + contract paths.
-3. Orchestrator sequences leads deterministically: `shared → main → renderer → qa → infra`.
-4. Each lead reads its contract, reads `learnings.md`, produces briefs, invokes its implementers, quality-gates output.
-5. `lead-deep-review` runs after `lead-qa` COMPLETE.
-6. `cross-pr-reviewer` runs last.
-7. Orchestrator surfaces the verification section from the task file + files changed, and soft-prompts for `/post-fix`.
+2. Update the task file's `status` from `planned` to `in-progress` before invoking the orchestrator. This is what `/task-closeout`'s pre-flight check (requiring `in-progress` or `review`) was written against; without this transition the check is vacuously bypassed and `/tasks-overview` misreports active work as `planned`. If the task file is already `in-progress` or `review` (e.g., resuming after a BLOCKED pause), leave it unchanged.
+3. Invoke `orchestrator` with the task file + contract paths.
+4. Orchestrator sequences leads deterministically: `shared → main → renderer → qa → infra`.
+5. Each lead reads its contract, reads `learnings.md`, produces briefs, invokes its implementers, quality-gates output.
+6. `lead-deep-review` runs after `lead-qa` COMPLETE.
+7. `cross-pr-reviewer` runs last.
+8. Orchestrator surfaces the verification section from the task file + files changed, and soft-prompts for `/post-fix`.
 
 **Hard gates:** any lead BLOCKED stops the pipeline. Orchestrator escalates with `[BLOCKED]`.
 

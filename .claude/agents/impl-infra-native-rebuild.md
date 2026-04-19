@@ -1,7 +1,7 @@
 ---
 name: impl-infra-native-rebuild
 description: Writes scripts and docs for `@electron/rebuild` — the native-module ABI rebuild step needed after `pnpm install`. Does NOT run rebuild. Invoked by lead-infra only when native-dep workflow needs changes.
-model: opus
+model: sonnet
 effort: max
 color: orange
 x-tier: implementer

@@ -78,6 +78,7 @@ Violating the boundary is a BLOCKER at review. Electron builds will often let th
 - `awaitWriteFinish: { stabilityThreshold: 150 }` prevents duplicate events during editor saves.
 - Every event must be classified (`agentChanged`, `settingsChanged`, etc.). Unknown paths are dropped silently.
 - On path changes to the watched root, unregister and re-register — don't try to "move" a watcher.
+- Forward chokidar's `evt` argument into the classifier. `on('all', (evt, absPath) => classify(rel, evt))` — drop the `evt` arg and every mutation collapses to `*Changed`, leaving `*Added` / `*Removed` discriminated-union variants as dead code that passes review because the union declaration still compiles. Map `add → *Added`, `unlink → *Removed`, `change → *Changed` per watched kind. Belt-and-suspenders: also filter tempfile suffixes (e.g., `.md.tmp`) at the watcher boundary, not only in downstream consumers.
 
 ---
 
@@ -88,6 +89,7 @@ Violating the boundary is a BLOCKER at review. Electron builds will often let th
 - `backgroundColor: '#0b0b0f'` to avoid white flash on dark-theme default.
 - On Windows: `autoHideMenuBar: true`. On macOS: `titleBarStyle: 'hiddenInset'` (traffic-light spacing).
 - Do not open multiple windows for the same project without a use case — prefer tabs in-window.
+- `dialog.showOpenDialog(options)` / `showSaveDialog(options)` without a parent BrowserWindow on Windows opens a **modeless** dialog that may appear behind the main window — users perceive "the button does nothing." Always pass the sender window: `BrowserWindow.fromWebContents(event.sender) ?? BrowserWindow.getFocusedWindow()` as the first arg. Pair with a try/catch in the renderer click handler that surfaces IPC rejections as a visible Alert — async handlers swallow errors silently without DevTools open.
 
 ---
 

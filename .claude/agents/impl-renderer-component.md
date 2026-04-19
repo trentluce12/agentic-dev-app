@@ -1,7 +1,7 @@
 ---
 name: impl-renderer-component
 description: Writes a reusable component under `apps/desktop/src/renderer/src/components/` (outside `ui/`). Used for domain widgets shared across features — e.g., an agent-tier badge. Invoked by lead-renderer.
-model: opus
+model: sonnet
 effort: max
 color: purple
 x-tier: implementer

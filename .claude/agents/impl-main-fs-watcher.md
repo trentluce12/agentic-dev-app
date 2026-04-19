@@ -1,7 +1,7 @@
 ---
 name: impl-main-fs-watcher
 description: Writes the chokidar-based FS watcher in apps/desktop/src/main/fs-watcher.ts. Classifies `.claude/*` changes into typed events and emits them to downstream consumers. Invoked by lead-main.
-model: opus
+model: sonnet
 effort: max
 color: blue
 x-tier: implementer

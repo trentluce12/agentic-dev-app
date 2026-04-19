@@ -1,7 +1,7 @@
 ---
 name: impl-renderer-feature
 description: Writes a feature module at `apps/desktop/src/renderer/src/features/<name>/` with its components, hooks, and Zustand slice. Consumes window.api (never main directly). Invoked by lead-renderer.
-model: opus
+model: sonnet
 effort: max
 color: purple
 x-tier: implementer

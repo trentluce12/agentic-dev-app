@@ -87,6 +87,13 @@ Script naming is consistent across packages: every package that has tests expose
 
 ---
 
+## Bundling Workspace Packages (electron-vite)
+
+- `externalizeDepsPlugin()` with no args externalizes every entry in `dependencies` — including `@agentic-dev-app/*` workspace packages whose `main` points at raw `.ts` source. At main-process runtime Node has no TS loader, so imports throw `ERR_UNKNOWN_FILE_EXTENSION`. Fix: discover workspace package names at config load (read `packages/*/package.json`, collect `name` fields, sync + fail-soft + `__dirname`-relative) and pass as `externalizeDepsPlugin({ exclude: [...] })`. Future workspace packages inherit correct bundling without config changes.
+- Related: `TanStackRouterVite` options resolved against the renderer root need absolute paths (`resolve(__dirname, ...)`) — relative strings double up when the plugin re-resolves against `root`.
+
+---
+
 ## Biome & Linting
 
 - One `biome.json` at the root. All packages share it.

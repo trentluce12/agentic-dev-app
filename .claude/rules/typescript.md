@@ -43,6 +43,7 @@
 - Derive TS types from Zod: `type Foo = z.infer<typeof fooSchema>`. Do not hand-write types that parallel a Zod schema.
 - Use discriminated unions for tagged shapes: `z.discriminatedUnion('type', [...])`.
 - For numeric coercion of form values, use `z.coerce.number()` — not `z.number()`.
+- `.passthrough()` preserves **passthrough** key insertion order on `.parse()`, but **reorders known keys to schema declaration order**. A round-trip property test that builds inputs in schema-declaration order never exercises the reorder path and will silently pass even if known-key ordering is mangled on real user input. When writing round-trip property tests for passthrough schemas, shuffle known-key order in the generator (e.g., `fc.shuffledSubarray` over the declared keys) to catch reorder regressions.
 
 ---
 

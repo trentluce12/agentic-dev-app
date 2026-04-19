@@ -1,7 +1,7 @@
 ---
 name: impl-qa-fixture
 description: Creates fixture projects and recorded transcripts under `tests/fixtures/`. Each fixture is a self-contained example of a `.claude/` project, a session transcript, or an input-payload set. Invoked by lead-qa when existing fixtures don't cover a new test path.
-model: opus
+model: sonnet
 effort: max
 color: yellow
 x-tier: implementer

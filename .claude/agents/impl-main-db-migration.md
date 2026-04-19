@@ -1,7 +1,7 @@
 ---
 name: impl-main-db-migration
 description: Writes Drizzle schema changes and inline SQL migrations in apps/desktop/src/main/db/. Keeps schema.ts and the raw migration SQL in sync. Invoked by lead-main.
-model: opus
+model: sonnet
 effort: max
 color: blue
 x-tier: implementer

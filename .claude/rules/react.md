@@ -84,6 +84,8 @@
 - Prefer a composition of extensions over a "one big wrapper component."
 - The agent editor splits frontmatter and body: two CM6 editors side-by-side, with a shared linter extension driven by Zod parse results.
 - Never import `codemirror` (the meta-package) — import from the specific `@codemirror/*` packages so tree-shaking works.
+- Never reconstruct a frontmatter document as `---\n<yaml>\n---\n<body>` and re-parse with a full frontmatter parser to derive linter diagnostics. User YAML containing `---` inside a multi-line block scalar (`|` / `>` style) will match the outer fence regex and close the synthetic frontmatter prematurely, producing garbage diagnostics on every keystroke. Parse the YAML text directly (`parseYaml(yamlText) → schema.safeParse`) and reuse the exact same parse path as the save handler — factor to a shared helper so the diagnostic path and the save path can never disagree.
+- CM6 editor host `<div>`s carry no a11y metadata by default; CM6's internal hints on `.cm-content` do not label the pane's purpose. Every CM6 host MUST carry `role="textbox"`, `aria-multiline="true"`, and an `aria-label` threaded via a required component prop — two panes side-by-side (e.g., YAML frontmatter + Markdown body) are otherwise indistinguishable to screen readers. Callers pass descriptive labels like `"Agent frontmatter (YAML)"` / `"Agent body (Markdown)"`.
 
 ---
 

@@ -56,6 +56,8 @@ In this project:
 
 Rule of thumb: if you can write the sequence as a numbered list that doesn't change, make it a workflow. Only use an agent for genuine branching.
 
+**Parallelization rule.** Leads always run **serially** in the deterministic order `shared → main → renderer → qa → infra` — their outputs are consumed by later leads, so parallelism breaks the quality gate. Implementers **within a single lead run** may be parallelized when their file targets are disjoint (observed in 0002: `impl-renderer-shadcn` writing `components/ui/` ran in parallel with `impl-renderer-editor` writing `codemirror/`; all three `lead-qa` implementers ran in parallel). First implementer in a dependency chain (e.g., fixture creation before tests that consume it) must finish before dependents start. When unsure whether targets are disjoint, default to serial — a serial run is always correct, a parallel run can race.
+
 ---
 
 ## The `x-tier` Frontmatter Convention
@@ -71,6 +73,28 @@ Because Claude Code ignores unknown frontmatter keys, the `x-tier` field is safe
 - **Workflow editor validation** (Phase 4): rejects graphs that violate tier constraints.
 
 Keep the convention advisory — warnings, not errors — so it's retired cleanly if Claude Code ever supports native deep nesting.
+
+---
+
+## Model Allocation Policy
+
+Not every agent needs Opus. Model choice is a per-agent decision driven by where correctness is actually produced.
+
+**Default for implementers is `sonnet`.** Spec-driven implementers work from a complete four-element brief and are quality-gated downstream by `lead-deep-review` + `cross-pr-reviewer`. Task 0002 confirmed that implementer-stage bugs (FS-watcher event plumbing, CM6 linter reparse, dialog parent window, electron-vite externalization, Zod passthrough reorder) were caught in review, not at implementer-authoring time — so Opus depth at Tier 2 is wasted spend for the common case.
+
+**Stay on `opus` when the agent owns a pre-review correctness invariant that review cannot reliably catch.** Current Opus implementers:
+
+- `impl-main-subprocess` — stdout line-buffering correctness (partial-line carry-forward).
+- `impl-main-hook-server` — <5ms hot-path contract; latency regressions won't surface in review.
+- `impl-shared-zod` — round-trip fidelity (passthrough key ordering, coercion pitfalls).
+- `impl-renderer-editor` — CM6 extension composition + linter pitfalls (synthetic-fence reparse, a11y metadata).
+- `impl-infra-build` — electron-vite config subtleties (workspace-package externalization, resolver path doubling).
+
+**Tiers 0, 1, and all cross-cutting / meta agents stay on `opus` unconditionally.** Orchestration, briefing discipline, and review quality compound — downgrading here saves little and risks a lot.
+
+**Judgment-call implementers stay on `opus` pending evidence.** `impl-qa-vitest`, `impl-qa-playwright`, and `impl-renderer-visualizer` are candidates for downgrade after a future task validates no regression. Do not downgrade speculatively — the learnings loop decides.
+
+When adding a new agent, the default for a Tier-2 implementer is `sonnet`. Justify Opus in the agent's description or in the task that adds it; otherwise the next `/improve-claude` pass is likely to flag it.
 
 ---
 
