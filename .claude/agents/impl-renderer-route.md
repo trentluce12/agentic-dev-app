@@ -1,7 +1,7 @@
 ---
 name: impl-renderer-route
 description: Writes or restructures `apps/desktop/src/renderer/src/routes/*.tsx` files using TanStack Router's file-based API. Wires features into the routing tree. Invoked by lead-renderer.
-model: opus
+model: sonnet
 effort: max
 color: purple
 x-tier: implementer

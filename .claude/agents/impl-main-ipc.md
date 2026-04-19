@@ -1,7 +1,7 @@
 ---
 name: impl-main-ipc
 description: Writes IPC handlers in apps/desktop/src/main/ipc/ and updates apps/desktop/src/shared/ipc.ts + preload/index.ts. Enforces the contract that every new channel has a type, a handler, and a preload method — all in one change. Invoked by lead-main.
-model: opus
+model: sonnet
 effort: max
 color: blue
 x-tier: implementer

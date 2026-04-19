@@ -1,7 +1,7 @@
 ---
 name: impl-shared-protocol
 description: Writes pure TypeScript types for Claude Code's stream-json, transcript, and hook payloads in packages/claude-protocol/. No runtime deps. Invoked by lead-shared.
-model: opus
+model: sonnet
 effort: max
 color: blue
 x-tier: implementer

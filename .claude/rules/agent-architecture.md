@@ -76,6 +76,28 @@ Keep the convention advisory — warnings, not errors — so it's retired cleanl
 
 ---
 
+## Model Allocation Policy
+
+Not every agent needs Opus. Model choice is a per-agent decision driven by where correctness is actually produced.
+
+**Default for implementers is `sonnet`.** Spec-driven implementers work from a complete four-element brief and are quality-gated downstream by `lead-deep-review` + `cross-pr-reviewer`. Task 0002 confirmed that implementer-stage bugs (FS-watcher event plumbing, CM6 linter reparse, dialog parent window, electron-vite externalization, Zod passthrough reorder) were caught in review, not at implementer-authoring time — so Opus depth at Tier 2 is wasted spend for the common case.
+
+**Stay on `opus` when the agent owns a pre-review correctness invariant that review cannot reliably catch.** Current Opus implementers:
+
+- `impl-main-subprocess` — stdout line-buffering correctness (partial-line carry-forward).
+- `impl-main-hook-server` — <5ms hot-path contract; latency regressions won't surface in review.
+- `impl-shared-zod` — round-trip fidelity (passthrough key ordering, coercion pitfalls).
+- `impl-renderer-editor` — CM6 extension composition + linter pitfalls (synthetic-fence reparse, a11y metadata).
+- `impl-infra-build` — electron-vite config subtleties (workspace-package externalization, resolver path doubling).
+
+**Tiers 0, 1, and all cross-cutting / meta agents stay on `opus` unconditionally.** Orchestration, briefing discipline, and review quality compound — downgrading here saves little and risks a lot.
+
+**Judgment-call implementers stay on `opus` pending evidence.** `impl-qa-vitest`, `impl-qa-playwright`, and `impl-renderer-visualizer` are candidates for downgrade after a future task validates no regression. Do not downgrade speculatively — the learnings loop decides.
+
+When adding a new agent, the default for a Tier-2 implementer is `sonnet`. Justify Opus in the agent's description or in the task that adds it; otherwise the next `/improve-claude` pass is likely to flag it.
+
+---
+
 ## When to Escalate
 
 Escalate (return BLOCKED) when:

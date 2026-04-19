@@ -1,7 +1,7 @@
 ---
 name: impl-renderer-shadcn
 description: Adds a shadcn/ui primitive to `apps/desktop/src/renderer/src/components/ui/`. One primitive per invocation. Follows the copy-paste ownership model — primitives are OUR code, not a dependency. Invoked by lead-renderer.
-model: opus
+model: sonnet
 effort: max
 color: purple
 x-tier: implementer

@@ -1,7 +1,7 @@
 ---
 name: impl-qa-contract-verifier
 description: Writes a structural verification pass for the feature contract — checks that IPC channel types exist, UI fields bind as documented, SQLite columns match, schemas infer to the right shape. Invoked by lead-qa.
-model: opus
+model: sonnet
 effort: max
 color: yellow
 x-tier: implementer
