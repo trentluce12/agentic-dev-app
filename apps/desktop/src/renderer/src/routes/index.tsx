@@ -1,7 +1,10 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
-import { FolderOpen, Plus } from 'lucide-react';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { AlertCircle, FolderOpen, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { useProjectStore } from '../stores/projectStore.ts';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -13,10 +16,18 @@ function HomePage() {
     queryFn: () => window.api.projects.recent(),
   });
 
+  const [openError, setOpenError] = useState<string | null>(null);
+
   const handleOpen = async () => {
-    const project = await window.api.projects.open();
-    if (project) {
-      recent.refetch();
+    setOpenError(null);
+    try {
+      const project = await window.api.projects.open();
+      if (project) {
+        useProjectStore.getState().setCurrent(project);
+        recent.refetch();
+      }
+    } catch (err) {
+      setOpenError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -35,6 +46,13 @@ function HomePage() {
         </Button>
       </header>
       <section className="flex-1 overflow-auto px-8 py-6">
+        {openError !== null && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="size-4" />
+            <AlertTitle>Could not open project</AlertTitle>
+            <AlertDescription className="font-mono text-xs">{openError}</AlertDescription>
+          </Alert>
+        )}
         {recent.isLoading ? (
           <div className="text-sm text-muted-foreground">Loading recent projects…</div>
         ) : recent.data && recent.data.length > 0 ? (
@@ -44,19 +62,33 @@ function HomePage() {
                 key={p.path}
                 className="rounded-lg border border-border/60 bg-card/40 p-4 transition-colors hover:border-border hover:bg-card/70"
               >
-                <div className="text-sm font-medium">{p.name}</div>
-                <div className="mt-1 truncate font-mono text-xs text-muted-foreground">
-                  {p.path}
-                </div>
-                <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{p.agentCount} agents</span>
-                  {p.hasClaudeDir ? (
-                    <span className="rounded-sm bg-primary/15 px-1.5 py-0.5 text-primary">
-                      .claude
-                    </span>
-                  ) : (
-                    <span className="rounded-sm bg-muted px-1.5 py-0.5">no .claude</span>
-                  )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="mt-1 truncate font-mono text-xs text-muted-foreground">
+                      {p.path}
+                    </div>
+                    <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>{p.agentCount} agents</span>
+                      {p.hasClaudeDir ? (
+                        <span className="rounded-sm bg-primary/15 px-1.5 py-0.5 text-primary">
+                          .claude
+                        </span>
+                      ) : (
+                        <span className="rounded-sm bg-muted px-1.5 py-0.5">no .claude</span>
+                      )}
+                    </div>
+                  </div>
+                  <Button asChild size="sm" variant="outline">
+                    <Link
+                      to="/agents"
+                      onClick={() => {
+                        useProjectStore.getState().setCurrent(p);
+                      }}
+                    >
+                      Open
+                    </Link>
+                  </Button>
                 </div>
               </li>
             ))}

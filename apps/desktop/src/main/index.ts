@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BrowserWindow, app, shell } from 'electron';
+import type { IpcEvent } from '../shared/ipc.ts';
 import { initDatabase } from './db/index.ts';
 import { createFsWatcher } from './fs-watcher.ts';
 import { startHookServer } from './hook-server.ts';
@@ -35,6 +36,7 @@ async function createWindow(): Promise<BrowserWindow> {
 
   if (process.env.ELECTRON_RENDERER_URL) {
     await window.loadURL(process.env.ELECTRON_RENDERER_URL);
+    window.webContents.openDevTools({ mode: 'detach' });
   } else {
     await window.loadFile(join(__dirname, '../renderer/index.html'));
   }
@@ -51,14 +53,76 @@ app.whenReady().then(async () => {
 
   await createWindow();
 
-  const broadcastEvent = (channel: string, payload: unknown) => {
+  const broadcastTyped = (event: IpcEvent): void => {
     for (const win of BrowserWindow.getAllWindows()) {
-      win.webContents.send('ipc:event', { channel, ...(payload as Record<string, unknown>) });
+      win.webContents.send('ipc:event', event);
     }
   };
 
-  hookServer.onEvent((event) => broadcastEvent('hook:received', event));
-  fsWatcher.onChange((event) => broadcastEvent('fs:changed', event));
+  hookServer.onEvent((payload) => {
+    broadcastTyped({ channel: 'hook:received', sessionId: payload.session_id, payload });
+  });
+
+  fsWatcher.onChange((event) => {
+    switch (event.kind) {
+      case 'agentAdded':
+        broadcastTyped({
+          channel: 'fs:agentAdded',
+          projectPath: event.projectPath,
+          agentPath: event.path,
+        });
+        break;
+      case 'agentChanged':
+        broadcastTyped({
+          channel: 'fs:agentChanged',
+          projectPath: event.projectPath,
+          agentPath: event.path,
+        });
+        break;
+      case 'agentRemoved':
+        broadcastTyped({
+          channel: 'fs:agentRemoved',
+          projectPath: event.projectPath,
+          agentPath: event.path,
+        });
+        break;
+      case 'commandAdded':
+        broadcastTyped({
+          channel: 'fs:commandAdded',
+          projectPath: event.projectPath,
+          commandPath: event.path,
+        });
+        break;
+      case 'commandChanged':
+        broadcastTyped({
+          channel: 'fs:commandChanged',
+          projectPath: event.projectPath,
+          commandPath: event.path,
+        });
+        break;
+      case 'commandRemoved':
+        broadcastTyped({
+          channel: 'fs:commandRemoved',
+          projectPath: event.projectPath,
+          commandPath: event.path,
+        });
+        break;
+      case 'settingsChanged':
+        broadcastTyped({
+          channel: 'fs:settingsChanged',
+          projectPath: event.projectPath,
+          settingsPath: event.path,
+        });
+        break;
+      case 'hookScriptChanged':
+        broadcastTyped({
+          channel: 'fs:hookScriptChanged',
+          projectPath: event.projectPath,
+          hookPath: event.path,
+        });
+        break;
+    }
+  });
 
   app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
